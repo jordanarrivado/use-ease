@@ -15,10 +15,15 @@ export default function SchedulesPage() {
   const [editingSchedule, setEditingSchedule] = useState<Schedule | undefined>();
   const [previewSchedule, setPreviewSchedule] = useState<Schedule | undefined>();
 
-  const handleSaveBackground = (scheduleId: string, background: any) => {
+  const handleSavePosterSettings = (scheduleId: string, posterData: any) => {
     const schedule = schedules.find(s => s.id === scheduleId);
     if (schedule) {
-      updateSchedule(scheduleId, { ...schedule, background });
+      updateSchedule(scheduleId, { 
+        ...schedule, 
+        background: posterData.backgroundSettings,
+        textSettings: posterData.textSettings,
+        aspectRatio: posterData.aspectRatio 
+      });
     }
   };
 
@@ -130,12 +135,13 @@ export default function SchedulesPage() {
         <ScheduleForm schedule={editingSchedule} onClose={() => { setShowForm(false); setEditingSchedule(undefined); }} />
       </Modal>
 
+      {/* FIXED: onSave now uses the corrected handler */}
       {previewSchedule && (
         <SchedulePosterEditor
           schedule={previewSchedule}
           onClose={() => setPreviewSchedule(undefined)}
-          onSave={(background) => {
-            handleSaveBackground(previewSchedule.id, background);
+          onSave={(posterData: any) => {
+            handleSavePosterSettings(previewSchedule.id, posterData);
             setPreviewSchedule(undefined);
           }}
         />
