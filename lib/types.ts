@@ -1,3 +1,5 @@
+// lib/types.ts - Updated types
+
 export interface Plan {
   id: string;
   name: string;
@@ -6,12 +8,35 @@ export interface Plan {
   endDate: string;
 }
 
+export interface Member {
+  name: string;
+  age: number;
+  department: string;
+}
+
+export interface Assignee {
+  id: string;
+  roleName: string;
+  member: Member | null;
+}
+
+export interface BackgroundSettings {
+  image?: string; 
+  gradient?: string; 
+  overlay?: {
+    color: string;
+    opacity: number;
+  };
+  filter?: string; 
+}
+
 export interface Schedule {
   id: string;
-  planName: string;
-  startTime: string;
-  endTime: string;
+  title: string;  
+  date: string;   
   status: 'scheduled' | 'completed';
+  assignees?: Assignee[];
+  background?: BackgroundSettings;
 }
 
 export interface Announcement {
