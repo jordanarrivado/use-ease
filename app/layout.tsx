@@ -40,7 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         <div className="w-3 h-3 bg-white rounded-full" />
                       </div>
                       <h1 className="text-lg font-semibold tracking-tight truncate">
-                        Management<span className="text-blue-600">System</span>
+                        Use<span className="text-blue-600"> Ease</span>
                       </h1>
                     </div>
 
