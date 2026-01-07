@@ -3,15 +3,17 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Plan, Schedule, Announcement } from '@/lib/types';
 
+export type ScheduleWithId = Schedule & { id: string };
+
 interface AppContextType {
   plans: Plan[];
-  schedules: Schedule[];
+  schedules: ScheduleWithId[];
   announcements: Announcement[];
   addPlan: (plan: Omit<Plan, 'id'>) => void;
   updatePlan: (id: string, plan: Omit<Plan, 'id'>) => void;
   deletePlan: (id: string) => void;
-  addSchedule: (schedule: Omit<Schedule, 'id'>) => void;
-  updateSchedule: (id: string, schedule: Omit<Schedule, 'id'>) => void;
+  addSchedule: (schedule: Schedule) => void;
+  updateSchedule: (id: string, schedule: Schedule) => void;
   deleteSchedule: (id: string) => void;
   addAnnouncement: (announcement: Omit<Announcement, 'id'>) => void;
   deleteAnnouncement: (id: string) => void;
@@ -21,64 +23,79 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [plans, setPlans] = useState<Plan[]>([]);
-  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [schedules, setSchedules] = useState<ScheduleWithId[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 
+  const addAnnouncement = (announcement: Omit<Announcement, 'id'>) => {
+    const newAnnouncement = { 
+      ...announcement, 
+      id: `announ-${Date.now()}-${Math.random().toString(36).substr(2, 5)}` 
+    };
+    setAnnouncements(prev => [newAnnouncement, ...prev]);
+  };
+
+  const deleteAnnouncement = (id: string) => {
+    setAnnouncements(prev => prev.filter(a => a.id !== id));
+  };
   const addPlan = (plan: Omit<Plan, 'id'>) => {
-    const newPlan = { ...plan, id: Date.now().toString() };
+    const newPlan = { ...plan, id: `plan-${Date.now()}` };
     setPlans(prev => [...prev, newPlan]);
     
     addAnnouncement({
-      title: `New Plan Created: ${plan.name}`,
-      content: `A new ${plan.type} plan "${plan.name}" has been created, scheduled from ${new Date(plan.startDate).toLocaleDateString()} to ${new Date(plan.endDate).toLocaleDateString()}.`,
+      title: `Plan Created: ${plan.name}`,
+      content: `New ${plan.type} plan active from ${new Date(plan.startDate).toLocaleDateString()}.`,
       publishAt: new Date().toISOString(),
       isAuto: true
     });
   };
 
-  const updatePlan = (id: string, plan: Omit<Plan, 'id'>) => {
-    setPlans(prev => prev.map(p => p.id === id ? { ...plan, id } : p));
+  const updatePlan = (id: string, updatedFields: Omit<Plan, 'id'>) => {
+    setPlans(prev => prev.map(p => p.id === id ? { ...updatedFields, id } : p));
   };
 
   const deletePlan = (id: string) => {
     setPlans(prev => prev.filter(p => p.id !== id));
   };
 
-  const addSchedule = (schedule: Omit<Schedule, 'id'>) => {
-    const newSchedule = { ...schedule, id: Date.now().toString() };
+  const addSchedule = (schedule: Schedule) => {
+    const id = `sched-${Date.now()}`;
+    const newSchedule: ScheduleWithId = {
+      ...schedule,
+      id,
+      assignees: schedule.assignees || [],
+    };
+
     setSchedules(prev => [...prev, newSchedule]);
     
     addAnnouncement({
-      title: `Schedule Created for ${schedule.planName}`,
-      content: `A new schedule has been created for "${schedule.planName}" from ${new Date(schedule.startTime).toLocaleString()} to ${new Date(schedule.endTime).toLocaleString()}.`,
+      title: `New Schedule: ${schedule.title}`,
+      content: `New event set for ${schedule.date ? new Date(schedule.date).toLocaleString() : 'TBD'}${schedule.location ? ` at ${schedule.location}` : ''}.`,
       publishAt: new Date().toISOString(),
       isAuto: true
     });
   };
 
-  const updateSchedule = (id: string, schedule: Omit<Schedule, 'id'>) => {
-    setSchedules(prev => prev.map(s => s.id === id ? { ...schedule, id } : s));
+  const updateSchedule = (id: string, schedule: Schedule) => {
+    setSchedules(prev => prev.map(s => (s.id === id ? { ...schedule, id } : s)));
   };
 
   const deleteSchedule = (id: string) => {
     setSchedules(prev => prev.filter(s => s.id !== id));
   };
 
-  const addAnnouncement = (announcement: Omit<Announcement, 'id'>) => {
-    const newAnnouncement = { ...announcement, id: Date.now().toString() };
-    setAnnouncements(prev => [...prev, newAnnouncement]);
-  };
-
-  const deleteAnnouncement = (id: string) => {
-    setAnnouncements(prev => prev.filter(a => a.id !== id));
-  };
-
   return (
     <AppContext.Provider value={{
-      plans, schedules, announcements,
-      addPlan, updatePlan, deletePlan,
-      addSchedule, updateSchedule, deleteSchedule,
-      addAnnouncement, deleteAnnouncement
+      plans, 
+      schedules, 
+      announcements,
+      addPlan, 
+      updatePlan, 
+      deletePlan,
+      addSchedule, 
+      updateSchedule, 
+      deleteSchedule,
+      addAnnouncement, 
+      deleteAnnouncement
     }}>
       {children}
     </AppContext.Provider>
